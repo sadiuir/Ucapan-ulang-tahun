@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kenangan Indah Kita - Nur & Musadi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600;700&family=Sacramento&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); /* Gradasi biru langit sejuk */
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 20px; 
+            padding-bottom: 70px; 
+            overflow: hidden; 
+        }
+
+        .slideshow-container {
+            width: 90vw;
+            height: 75vh; 
+            max-width: 900px; 
+            max-height: 600px;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            perspective: 1500px; 
+        }
+
+        .slide { 
+            position: absolute;
+            width: 50vw; 
+            max-width: 360px; 
+            height: 70vh; 
+            max-height: 500px;
+            top: 50%;
+            left: 50%;
+            display: flex;
+            flex-direction: column;
+            /* justify-content defaultnya flex-start, akan diubah oleh JS jika hanya teks */
+            align-items: center;   
+            background-color: rgba(255, 255, 255, 0.15); 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 1s ease-in-out;
+            transform-style: preserve-3d; 
+            overflow: hidden; /* Konten yang melebihi slide akan terpotong */
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(0.4); 
+        }
+
+        .slide img {
+            width: 100%; 
+            height: 70%; /* Default height jika gambar ada */
+            object-fit: cover; 
+            border-radius: 20px 20px 0 0; 
+            flex-shrink: 0; /* Mencegah gambar menyusut jika caption panjang */
+        }
+
+        .caption {
+            font-family: 'Poppins', sans-serif; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5); 
+            padding: 12px 18px; 
+            background-color: rgba(0,0,0,0.55); 
+            width: 100%; 
+            text-align: center;
+            box-sizing: border-box;
+            position: relative; /* Diubah dari absolute agar bisa diatur oleh flex parent */
+            bottom: auto; /* Tidak lagi absolut di bawah */
+            left: auto;
+            min-height: 30%; /* Default min-height jika gambar ada */
+            border-radius: 0 0 20px 20px; /* Default jika gambar ada */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5; 
+            flex-grow: 1; /* Memungkinkan caption mengisi sisa ruang */
+            overflow-y: auto; /* Scroll jika teks sangat panjang */
+        }
+        
+        /* Styling khusus untuk slide yang hanya berisi teks */
+        .slide.text-only-layout {
+            justify-content: center; /* Pusatkan caption secara vertikal */
+        }
+        .slide.text-only-layout .caption {
+            min-height: auto; /* Hapus min-height default */
+            height: auto; /* Biarkan tinggi menyesuaikan konten */
+            max-height: 90%; /* Batasi tinggi maksimal caption */
+            width: 90%; /* Sesuaikan lebar caption */
+            border-radius: 15px; /* Bulatkan semua sudut */
+            font-size: 1.2rem; /* Sedikit perbesar font */
+            padding: 20px; /* Padding lebih besar */
+            background-color: rgba(0,0,0,0.65); /* Latar sedikit lebih gelap untuk kontras teks */
+        }
+
+
+        .is-hidden { 
+            transform: translate(-50%, -50%) translateZ(-250px) scale(0.3) !important; 
+            opacity: 0 !important; 
+            z-index: 0;
+        }
+
+        .is-front {
+            transform: translate(-50%, -50%) translateZ(100px) scale(1); 
+            opacity: 1; 
+            z-index: 3;
+        }
+
+        .is-back-left {
+            transform: translate(-50%, -50%) translateX(-80%) translateY(8%) translateZ(-120px) scale(0.65);
+            opacity: 0.6; 
+            z-index: 1;
+        }
+
+        .is-back-right {
+            transform: translate(-50%, -50%) translateX(80%) translateY(8%) translateZ(-120px) scale(0.65);
+            opacity: 0.6; 
+            z-index: 2; 
+        }
+        
+        #audio-info { 
+            position: fixed; 
+            top: 15px; 
+            left: 15px; 
+            background-color: rgba(0,0,0,0.6); 
+            color: white; 
+            padding: 8px 15px; 
+            border-radius: 10px; 
+            font-size: 0.85rem; 
+            z-index: 100;
+        }
+        .back-button { 
+            position: fixed;
+            bottom: 20px; 
+            left: 50%;
+            transform: translateX(-50%); 
+            background: linear-gradient(to right, #56ccf2 0%, #2f80ed 100%);
+            color: white; 
+            border: none; 
+            padding: 12px 30px; 
+            border-radius: 25px; 
+            font-size: 1rem; 
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer; 
+            text-decoration: none; 
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(47, 128, 237, 0.4);
+            z-index: 100;
+        }
+        .back-button:hover { 
+            transform: translateX(-50%) translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(47, 128, 237, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .slideshow-container { height: 70vh; max-height: 500px; }
+            .slide { width: 75vw; max-width: 300px; height: 65vh; max-height: 420px; }
+            .slide img { height: 65%; }
+            .caption { 
+                font-size: 1rem; 
+                padding: 10px 12px; 
+            }
+            .slide.text-only-layout .caption {
+                 font-size: 1.1rem; /* Ukuran font teks saja di mobile */
+                 padding: 15px;
+            }
+            .is-back-left { transform: translate(-50%, -50%) translateX(-70%) translateY(5%) translateZ(-100px) scale(0.6); }
+            .is-back-right { transform: translate(-50%, -50%) translateX(70%) translateY(5%) translateZ(-100px) scale(0.6); }
+            .back-button { font-size: 0.9rem; padding: 10px 25px; bottom: 15px; }
+            #audio-info { font-size: 0.75rem; padding: 6px 12px; top:10px; left:10px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="audio-info" style="display:none;">Memuat musik...</div>
+    <div class="slideshow-container" id="slideshow">
+        <div class="slide" id="player-a"></div>
+        <div class="slide" id="player-b"></div>
+        <div class="slide" id="player-c"></div>
+    </div>
+
+    <div class="audio-player-container" style="display: none;">
+        <audio id="backgroundMusic" loop><source src="music/hbd.mp3" type="audio/mpeg">Browser Anda tidak mendukung elemen audio.</audio>
+    </div>
+    <a href="ucapan.html" class="back-button">&laquo; Kembali ke Ucapan</a> 
+
+    <script>
+        const slideshowData = [
+            { sumberGambar: "foto/1.png", caption: "Ya Allah, di hari istimewa sahabatku Nur Qolbi, limpahkanlah ia kebahagiaan & kemudahan dalam setiap langkahnya. Aamiin. 🤲" },
+            { sumberGambar: "foto/2.png", caption: "Semoga Engkau selalu menerangi jalannya dengan ilmu yang bermanfaat dan hati yang penuh syukur, Qolbi. 🎂" },
+            { sumberGambar: "foto/3.png", caption: "Ya Rabb, jadikanlah senyumnya sebagai tanda ketenangan hati dan keberkahan hidup. ✨" },
+            { sumberGambar: "foto/4.png", caption: "Ini adalah contoh caption tanpa gambar yang valid. Semoga doa ini sampai kepada-Mu, Ya Allah, untuk kebaikan Nur Qolbi." }, // Contoh data tanpa gambar valid
+            { sumberGambar: "foto/5.png", caption: "Semoga setiap momen dalam hidupnya menjadi ladang pahala dan kebaikan. 🎁" },
+            { sumberGambar: "foto/6.png", caption: "Ya Allah, hanya kepada-Mu kami memohon, kabulkanlah doa tulus untuk sahabat kami, Nur Qolbi Islamiah. Berikan ia yang terbaik." }, // Contoh data dengan sumberGambar kosong
+            { sumberGambar: "foto/7.png", caption: "Kabulkanlah segala doa dan harapan baiknya, mudahkanlah cita-citanya, wahai Dzat Yang Maha Mendengar. 🙏" },
+            { sumberGambar: "foto/8.png", caption: "Semoga Engkau berikan ia semangat setinggi langit untuk meraih impian, dan bimbingan di setiap pilihan. 🎈" },
+            { sumberGambar: "foto/9.png", caption: "Ya Allah, berkahilah persahabatan kami, jadikanlah ia ikatan yang membawa kebaikan dunia dan akhirat. 🥂" },
+            { sumberGambar: "foto/10.png", caption: "Semoga Nur Qolbi Islamiah selalu dalam lindungan-Mu, diberikan kesehatan, dan kebahagiaan yang tak terputus. Aamiin ya Rabbal'alamin. ❤️ - Musadi" }
+        ];
+
+        const playerA = document.getElementById('player-a');
+        const playerB = document.getElementById('player-b');
+        const playerC = document.getElementById('player-c');
+        const players = [playerA, playerB, playerC];
+        const slideshowContainer = document.getElementById('slideshow');
+
+        let currentLogicalFrontIndex = 0;
+        const slideDuration = 7000; 
+
+        function updatePlayerContent(playerElement, data) {
+            // Reset elemen dan kelas sebelum mengisi konten baru
+            playerElement.innerHTML = ''; 
+            playerElement.classList.remove('text-only-layout'); // Hapus kelas text-only jika ada dari slide sebelumnya
+            playerElement.style.justifyContent = 'flex-start'; // Default layout untuk gambar + caption
+
+            if (!data) {
+                playerElement.classList.add('is-hidden');
+                return;
+            }
+
+            const captionDiv = document.createElement('div');
+            captionDiv.classList.add('caption');
+            captionDiv.textContent = data.caption;
+            // Reset style caption yang mungkin diubah oleh mode text-only
+            captionDiv.style.height = '';
+            captionDiv.style.maxHeight = '';
+            captionDiv.style.width = '';
+            captionDiv.style.borderRadius = '';
+            captionDiv.style.fontSize = '';
+            captionDiv.style.padding = '';
+            captionDiv.style.overflowY = '';
+
+
+            let hasValidImage = data.sumberGambar && data.sumberGambar.trim() !== "";
+
+            if (hasValidImage) {
+                const img = document.createElement('img');
+                img.alt = data.caption || `Doa untuk Nur Qolbi dari Musadi`;
+                
+                img.onload = function() {
+                    // Jika gambar berhasil dimuat, pastikan layout standar (gambar + caption)
+                    playerElement.classList.remove('text-only-layout');
+                    playerElement.style.justifyContent = 'flex-start';
+                    // Style caption kembali ke default untuk gambar + teks
+                    captionDiv.style.height = ''; 
+                    captionDiv.style.maxHeight = '';
+                    captionDiv.style.width = '';
+                    captionDiv.style.borderRadius = '0 0 20px 20px'; 
+                    captionDiv.style.fontSize = ''; 
+                    captionDiv.style.padding = ''; 
+                    captionDiv.style.overflowY = 'auto';
+                    console.log("Gambar berhasil dimuat:", this.src);
+                };
+
+                img.onerror = function() {
+                    console.error("Gagal memuat gambar:", this.src, ". Menampilkan teks saja.");
+                    this.remove(); // Hapus elemen img yang error
+                    playerElement.classList.add('text-only-layout'); // Terapkan layout khusus teks
+                    // Style caption untuk mode teks saja sudah diatur oleh CSS .slide.text-only-layout .caption
+                };
+                img.src = data.sumberGambar;
+                playerElement.appendChild(img);
+                playerElement.appendChild(captionDiv);
+            } else {
+                // Tidak ada sumberGambar atau string kosong, langsung tampilkan teks saja
+                console.log("Tidak ada sumber gambar, menampilkan teks saja untuk:", data.caption);
+                playerElement.classList.add('text-only-layout');
+                playerElement.appendChild(captionDiv);
+                 // Style caption untuk mode teks saja sudah diatur oleh CSS .slide.text-only-layout .caption
+            }
+        }
+
+        function assignRolesAndContent() {
+            // ... (Logika assignRolesAndContent tetap sama) ...
+            if (slideshowData.length === 0) return;
+            const len = slideshowData.length;
+
+            const frontDataIdx = currentLogicalFrontIndex % len;
+            const backRightDataIdx = (currentLogicalFrontIndex + 1) % len;
+            const backLeftDataIdx = (currentLogicalFrontIndex - 1 + len + len) % len; 
+            
+            let oldFrontEl = players.find(p => p.classList.contains('is-front'));
+            let oldBackLeftEl = players.find(p => p.classList.contains('is-back-left'));
+            let oldBackRightEl = players.find(p => p.classList.contains('is-back-right'));
+
+            if (!oldFrontEl && !oldBackLeftEl && !oldBackRightEl) { 
+                oldFrontEl = playerA; oldBackLeftEl = playerB; oldBackRightEl = playerC;
+            } else if (!oldFrontEl || !oldBackLeftEl || !oldBackRightEl) { 
+                console.warn("State kelas peran tidak konsisten, mereset.");
+                players.forEach(p => p.className = 'slide is-hidden'); 
+                oldFrontEl = playerA; oldBackLeftEl = playerB; oldBackRightEl = playerC;
+            }
+            
+            updatePlayerContent(oldBackRightEl, slideshowData[frontDataIdx]);
+            oldBackRightEl.className = 'slide is-front';
+
+            updatePlayerContent(oldFrontEl, slideshowData[backLeftDataIdx]);
+            oldFrontEl.className = 'slide is-back-left';
+
+            updatePlayerContent(oldBackLeftEl, slideshowData[backRightDataIdx]);
+            oldBackLeftEl.className = 'slide is-back-right';
+            
+            if (len < 3) {
+                if (len === 1) {
+                    updatePlayerContent(playerA, slideshowData[0]);
+                    playerA.className = 'slide is-front';
+                    if(playerB) playerB.className = 'slide is-hidden';
+                    if(playerC) playerC.className = 'slide is-hidden';
+                }
+            }
+        }
+        
+        function nextSlide() {
+            // ... (Logika nextSlide tetap sama) ...
+            if (slideshowData.length === 0) return;
+            if (slideshowData.length === 1) { 
+                 if (!playerA.classList.contains('is-front')) { 
+                    updatePlayerContent(playerA, slideshowData[0]);
+                    playerA.className = 'slide is-front';
+                    if(playerB) playerB.className = 'slide is-hidden';
+                    if(playerC) playerC.className = 'slide is-hidden';
+                 }
+                return; 
+            }
+            if (slideshowData.length === 2) {
+                let currentFront = players.find(p => p.classList.contains('is-front'));
+                let currentBackRight = players.find(p => p.classList.contains('is-back-right')) || players.find(p => p.classList.contains('is-hidden'));
+
+                if (!currentFront || !currentBackRight) { 
+                    currentLogicalFrontIndex = 0;
+                    currentFront = playerA; currentBackRight = playerC; 
+                    updatePlayerContent(currentFront, slideshowData[0]);
+                    currentFront.className = 'slide is-front';
+                    updatePlayerContent(currentBackRight, slideshowData[1]);
+                    currentBackRight.className = 'slide is-back-right';
+                    const otherPlayer = players.find(p => p !== currentFront && p !== currentBackRight);
+                    if(otherPlayer) otherPlayer.className = 'slide is-hidden';
+                    return; 
+                }
+                currentLogicalFrontIndex = (currentLogicalFrontIndex + 1) % 2; 
+                updatePlayerContent(currentFront, slideshowData[(currentLogicalFrontIndex + 1) % 2]); 
+                currentFront.className = 'slide is-back-right';
+                updatePlayerContent(currentBackRight, slideshowData[currentLogicalFrontIndex % 2]); 
+                currentBackRight.className = 'slide is-front';
+                return;
+            }
+            currentLogicalFrontIndex = (currentLogicalFrontIndex + 1) % slideshowData.length;
+            assignRolesAndContent();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... (Logika audio tetap sama) ...
+            const audioPlayer = document.getElementById('backgroundMusic');
+            const audioInfo = document.getElementById('audio-info');
+            
+            function playAudioInternal() {
+                return new Promise((resolve, reject) => {
+                    if (audioPlayer && audioPlayer.paused) {
+                        const audioSourceEl = audioPlayer.querySelector('source');
+                        if (audioSourceEl && audioSourceEl.getAttribute('src')) {
+                            const playPromise = audioPlayer.play();
+                            if (playPromise !== undefined) {
+                                playPromise.then(_ => {
+                                    if (audioInfo) { audioInfo.textContent = "Musik mengalun..."; audioInfo.style.display = 'block'; }
+                                    console.log("Audio berhasil diputar di foto.html");
+                                    document.body.removeEventListener('click', handleUserInteractionForAudio);
+                                    document.body.removeEventListener('touchstart', handleUserInteractionForAudio);
+                                    resolve();
+                                }).catch(error => {
+                                    console.warn("Gagal memutar musik di foto.html:", error);
+                                    reject(error); 
+                                });
+                            } else { 
+                                console.warn("audioPlayer.play() tidak mengembalikan promise.");
+                                if(audioPlayer.networkState === HTMLMediaElement.NETWORK_NO_SOURCE || audioPlayer.error) {
+                                   reject(audioPlayer.error || new Error("Sumber audio bermasalah."));
+                                } else {
+                                   reject(new Error("NotAllowedError")); 
+                                }
+                            }
+                        } else {
+                            if (audioInfo) { audioInfo.textContent = "Sumber musik tidak ditemukan."; audioInfo.style.display = 'block'; }
+                            console.warn("Sumber audio tidak valid di foto.html");
+                            reject(new Error("Sumber audio tidak valid"));
+                        }
+                    } else if (audioPlayer && !audioPlayer.paused) {
+                        if (audioInfo) { audioInfo.textContent = "Musik mengalun..."; audioInfo.style.display = 'block'; }
+                        resolve(); 
+                    } else if (!audioPlayer) {
+                         reject(new Error("Audio player tidak ditemukan."));
+                    } else { 
+                        reject(new Error("Audio player tidak dalam kondisi valid untuk diputar."));
+                    }
+                });
+            }
+
+            function handleUserInteractionForAudio() {
+                if (audioPlayer && audioPlayer.paused) {
+                    console.log("Foto: Interaksi pengguna, mencoba memutar audio.");
+                    playAudioInternal().catch(error => {
+                        if (error.name === "NotAllowedError" && audioInfo && audioPlayer.paused) { 
+                           if (audioInfo) audioInfo.textContent = "Ketuk lagi untuk mencoba musik."; 
+                        }
+                    });
+                }
+            }
+            
+            function playAudioAndSetupListenersGeneral() {
+                playAudioInternal()
+                    .catch(error => {
+                        if (error.name === "NotAllowedError") {
+                            if (audioInfo) {
+                                audioInfo.textContent = "Ketuk layar untuk memulai musik.";
+                                audioInfo.style.display = 'block';
+                            }
+                        } 
+                        
+                        if (audioPlayer && audioPlayer.paused) {
+                            document.body.addEventListener('click', handleUserInteractionForAudio);
+                            document.body.addEventListener('touchstart', handleUserInteractionForAudio);
+                        }
+                    });
+            }
+
+            if (audioPlayer) {
+                const savedTimeStr = localStorage.getItem('audioCurrentTime');
+                const savedSource = localStorage.getItem('audioSource');
+                const savedIsPlaying = localStorage.getItem('audioIsPlaying');
+
+                localStorage.removeItem('audioCurrentTime');
+                localStorage.removeItem('audioSource');
+                localStorage.removeItem('audioIsPlaying');
+
+                let audioSourceMatches = false;
+                const currentAudioElementSource = audioPlayer.querySelector('source');
+                const currentAudioSrcAttribute = currentAudioElementSource ? currentAudioElementSource.getAttribute('src') : null;
+
+                if (savedSource && currentAudioSrcAttribute && savedSource === currentAudioSrcAttribute) {
+                    audioSourceMatches = true;
+                }
+                
+                console.log("Foto: Data Audio Tersimpan - Waktu:", savedTimeStr, "Sumber:", savedSource, "Status Putar:", savedIsPlaying);
+                console.log("Foto: Sumber Audio Saat Ini:", currentAudioSrcAttribute, "Kecocokan Sumber:", audioSourceMatches);
+
+                if (savedTimeStr && audioSourceMatches) {
+                    const savedTime = parseFloat(savedTimeStr);
+                    if (!isNaN(savedTime)) {
+                        const attemptSetTimeAndPlay = () => {
+                            audioPlayer.currentTime = savedTime;
+                            console.log("Foto: Waktu audio diatur ke:", savedTime);
+                            if (savedIsPlaying === 'true') {
+                                console.log("Foto: Mencoba melanjutkan audio (otomatis).");
+                                playAudioInternal() 
+                                    .catch(error => {
+                                        console.log("Foto: Gagal melanjutkan audio otomatis.", error.name);
+                                        if (error.name === "NotAllowedError") {
+                                            if (audioInfo) {
+                                                audioInfo.textContent = "Ketuk untuk melanjutkan musik.";
+                                                audioInfo.style.display = 'block';
+                                            }
+                                            document.body.addEventListener('click', handleUserInteractionForAudio);
+                                            document.body.addEventListener('touchstart', handleUserInteractionForAudio);
+                                        } 
+                                    });
+                            } else { 
+                                console.log("Foto: Audio dijeda pada waktu tersimpan.");
+                                if (audioInfo) {
+                                    audioInfo.textContent = "Musik dijeda. Ketuk untuk lanjut.";
+                                    audioInfo.style.display = 'block';
+                                }
+                                document.body.addEventListener('click', handleUserInteractionForAudio);
+                                document.body.addEventListener('touchstart', handleUserInteractionForAudio);
+                            }
+                        };
+
+                        if (audioPlayer.readyState >= HTMLMediaElement.HAVE_METADATA) {
+                            attemptSetTimeAndPlay();
+                        } else {
+                            audioPlayer.onloadedmetadata = () => {
+                                console.log("Foto: Metadata audio dimuat, mencoba atur waktu.");
+                                attemptSetTimeAndPlay();
+                                audioPlayer.onloadedmetadata = null; 
+                            };
+                            audioPlayer.onerror = () => {
+                                if (audioInfo) {
+                                    audioInfo.textContent = "Gagal memuat data musik.";
+                                    audioInfo.style.display = 'block';
+                                }
+                                console.error("Error memuat metadata audio di foto.html:", audioPlayer.error);
+                                if (!savedTimeStr) playAudioAndSetupListenersGeneral();
+                            };
+                        }
+                    } else { 
+                         console.log("Foto: Waktu tersimpan tidak valid, putar dari awal.");
+                         playAudioAndSetupListenersGeneral();
+                    }
+                } else { 
+                    console.log("Foto: Tidak ada state audio tersimpan/sumber tidak cocok, putar dari awal.");
+                    playAudioAndSetupListenersGeneral();
+                }
+
+                audioPlayer.onplaying = function() { 
+                    if (audioInfo) { audioInfo.textContent = "Musik mengalun..."; audioInfo.style.display = 'block';}
+                };
+            } else {
+                 if(audioInfo) {audioInfo.textContent = "Player musik tidak ditemukan."; audioInfo.style.display = 'block';}
+            }
+            
+            // --- AWAL LOGIKA SLIDESHOW ---
+            if (slideshowData.length === 0) {
+                if(slideshowContainer) slideshowContainer.innerHTML = '<p style="color:white; font-size:1.3rem; font-family: Poppins, sans-serif;">Tidak ada kenangan untuk ditampilkan saat ini.</p>';
+                return;
+            }
+
+            players.forEach(p => p.className = 'slide is-hidden');
+            
+            if (slideshowData.length === 1) {
+                updatePlayerContent(playerA, slideshowData[0]);
+                playerA.className = 'slide is-front';
+            } else if (slideshowData.length === 2) {
+                currentLogicalFrontIndex = 0;
+                updatePlayerContent(playerA, slideshowData[0]);
+                playerA.className = 'slide is-front';
+                updatePlayerContent(playerC, slideshowData[1]); 
+                playerC.className = 'slide is-back-right';
+                if(playerB) playerB.className = 'slide is-hidden';
+                setInterval(nextSlide, slideDuration);
+            } else { 
+                currentLogicalFrontIndex = 0; 
+                const len = slideshowData.length;
+                updatePlayerContent(playerA, slideshowData[currentLogicalFrontIndex % len]);
+                playerA.className = 'slide is-front';
+                updatePlayerContent(playerB, slideshowData[(currentLogicalFrontIndex - 1 + len + len) % len]);
+                playerB.className = 'slide is-back-left';
+                updatePlayerContent(playerC, slideshowData[(currentLogicalFrontIndex + 1) % len]);
+                playerC.className = 'slide is-back-right';
+                setInterval(nextSlide, slideDuration);
+            }
+            // --- AKHIR LOGIKA SLIDESHOW ---
+        });
+    </script>
+</body>
+</html>

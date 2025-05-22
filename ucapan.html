@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harapan & Doa Untukmu, Nur Qolbi Islamiah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&family=Sacramento&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #ff9a9e 0%, #fecfef 100%); /* Gradasi pink lembut */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.15);
+            max-width: 650px; /* Sedikit lebih lebar untuk teks yang lebih panjang */
+            width: 100%;
+            padding: 40px 45px; /* Padding lebih besar */
+            text-align: center;
+            animation: fadeInContainer 1.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeInContainer {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .decorative-flower { /* Menggunakan satu kelas untuk dekorasi yang bisa diulang */
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            opacity: 0.6;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        .flower-top-left {
+            top: -25px; left: -25px;
+            background-image: url('https://placehold.co/70x70/FFB6C1/FFFFFF?text=❀&font=lora'); /* Placeholder bunga */
+            transform: rotate(-20deg);
+        }
+        .flower-bottom-right {
+            bottom: -30px; right: -30px;
+            width: 90px; height: 90px;
+            background-image: url('https://placehold.co/90x90/FFB6C1/FFFFFF?text=✿&font=lora'); /* Placeholder bunga lebih besar */
+            transform: rotate(15deg);
+        }
+         /* Sembunyikan gambar placeholder jika teks sudah cukup */
+        .decorative-flower img { display: none; }
+
+
+        .main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem; /* Lebih besar */
+            color: #c94b4b; /* Merah marun lembut */
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-family: 'Sacramento', cursive;
+            font-size: 2.5rem; /* Lebih besar */
+            color: #dd5e89; /* Pink lebih tua */
+            margin-bottom: 30px;
+        }
+
+        .prayer-text {
+            font-size: 1.1rem; /* Ukuran font standar untuk keterbacaan */
+            color: #4b4f56; /* Abu-abu gelap untuk teks */
+            line-height: 1.9;
+            margin-bottom: 25px;
+            text-align: left; /* Lebih mudah dibaca untuk paragraf panjang */
+        }
+
+        .prayer-text strong, .highlight {
+            font-weight: 600; /* Atau 'bold' */
+            color: #c94b4b;
+        }
+        .highlight { /* Gaya highlight yang lebih halus */
+            background: linear-gradient(to top, rgba(254, 207, 239, 0.6) 60%, transparent 60%);
+            padding: 0 2px;
+        }
+
+
+        .closing-signature {
+            font-family: 'Sacramento', cursive;
+            font-size: 2.2rem; /* Lebih besar */
+            color: #c94b4b;
+            margin-top: 30px;
+            margin-bottom: 35px;
+        }
+        
+        .nav-button {
+            background: linear-gradient(to right, #ff758c 0%, #ff7eb3 100%); /* Gradasi untuk tombol */
+            color: white;
+            border: none;
+            padding: 14px 32px; /* Tombol lebih besar */
+            border-radius: 30px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif; /* Font modern untuk tombol */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 126, 179, 0.4); /* Bayangan sesuai warna tombol */
+        }
+
+        .nav-button:hover {
+            transform: translateY(-4px) scale(1.03); /* Efek hover lebih dinamis */
+            box-shadow: 0 10px 25px rgba(255, 126, 179, 0.5);
+        }
+        .nav-button:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        #audio-warning {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            z-index: 1000;
+            animation: fadeInWarning 0.5s ease-out;
+        }
+
+        @keyframes fadeInWarning {
+            from { opacity: 0; bottom: 0px; }
+            to { opacity: 1; bottom: 20px; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 30px 25px; }
+            .main-title { font-size: 2.2rem; }
+            .subtitle { font-size: 2rem; }
+            .prayer-text { font-size: 1rem; }
+            .closing-signature { font-size: 1.8rem; }
+            .nav-button { padding: 12px 28px; font-size: 1rem; }
+            .decorative-flower { width: 50px; height: 50px; }
+            .flower-top-left { top: -15px; left: -15px; }
+            .flower-bottom-right { width: 70px; height: 70px; bottom: -20px; right: -20px; }
+            #audio-warning { font-size: 0.85rem; padding: 10px 18px; width: 90%; max-width: 320px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="decorative-flower flower-top-left" role="img" aria-label="Dekorasi bunga">
+             <img src="https://placehold.co/70x70/FFB6C1/FFFFFF?text=❀&font=lora" alt="">
+        </div>
+
+        <h1 class="main-title">Untukmu Sahabat Terbaik,</h1>
+        <h2 id="friendNameDisplay" class="subtitle">Nur Qolbi Islamiah</h2>
+
+        <p class="prayer-text">
+            Di hari yang penuh makna ini, aku, Musadi, ingin mengirimkan untaian doa dan harapan yang paling tulus dari hati.
+            Selamat ulang tahun, Qolbi! Semoga setiap langkahmu dalam menempuh pendidikan dan meraih cita-cita senantiasa diberkahi kemudahan dan kelancaran.
+            Ingatlah, setiap tantangan adalah kesempatan untuk tumbuh menjadi pribadi yang lebih kuat dan hebat.
+        </p>
+        <p class="prayer-text">
+            Teruslah <strong class="highlight">semangat mengejar ilmu</strong> dan jangan pernah lelah untuk belajar. Ilmu adalah pelita yang akan menerangi jalanmu.
+            Semoga kamu selalu menemukan <strong class="highlight">kebahagiaan</strong> dalam proses belajarmu, dikelilingi <strong class="highlight">teman-teman yang suportif</strong>, dan mendapatkan <strong class="highlight">ilmu yang bermanfaat</strong>.
+            Percayalah pada kemampuan dirimu, karena kamu punya potensi luar biasa untuk meraih semua impianmu.
+            Semoga sukses selalu menyertaimu, baik di dunia perkuliahan maupun di setiap aspek kehidupanmu.
+        </p>
+
+        <p class="closing-signature">
+            Dengan Penuh Semangat & Doa, <br>
+            <span id="yourNameDisplay">Musadi</span>
+        </p>
+
+        <div class="navigation-button-container">
+            <button id="nextButton" class="nav-button">Lihat Ini &rarr;</button>
+        </div>
+
+        <div class="audio-player-container" style="display: none;">
+            <audio id="backgroundAudio" loop>
+                <source src="music/hbd.mp3" type="audio/mpeg">
+                Browser Anda tidak mendukung elemen audio.
+            </audio>
+        </div>
+
+        <div class="decorative-flower flower-bottom-right" role="img" aria-label="Dekorasi bunga">
+            <img src="https://placehold.co/90x90/FFB6C1/FFFFFF?text=✿&font=lora" alt="">
+        </div>
+    </div>
+
+    <div id="audio-warning">Ketuk di mana saja untuk memutar musik latar.</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Nama sudah diatur langsung di HTML, jadi bagian kustomisasi JS ini bisa dihapus jika mau.
+            // const yourName = "Musadi"; // Sudah di HTML
+            // const friendName = "Nur Qolbi Islamiah"; // Sudah di HTML
+            // const friendNameElement = document.getElementById('friendNameDisplay');
+            // const yourNameElement = document.getElementById('yourNameDisplay');
+            // if (friendNameElement) friendNameElement.textContent = friendName;
+            // if (yourNameElement) yourNameElement.textContent = yourName;
+
+            const audioPlayer = document.getElementById('backgroundAudio');
+            const audioWarning = document.getElementById('audio-warning');
+            let hasInteracted = false; // Flag untuk interaksi pertama
+
+            function playAudio() {
+                if (!audioPlayer) return;
+                if (audioPlayer.paused) {
+                    const playPromise = audioPlayer.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(_ => {
+                            console.log("Audio berhasil diputar di ucapan.html.");
+                            if (audioWarning) audioWarning.style.display = 'none';
+                            hasInteracted = true; // Tandai sudah ada interaksi
+                            // Hapus listener setelah berhasil play dari interaksi
+                            document.body.removeEventListener('click', handleFirstInteraction);
+                            document.body.removeEventListener('touchstart', handleFirstInteraction);
+                        }).catch(error => {
+                            console.warn("Gagal memutar audio di ucapan.html:", error);
+                            if (audioWarning && error.name === "NotAllowedError" && !hasInteracted) {
+                                audioWarning.style.display = 'block';
+                            }
+                        });
+                    }
+                } else {
+                     if (audioWarning) audioWarning.style.display = 'none';
+                }
+            }
+            
+            if (audioPlayer) {
+                // Coba putar otomatis, mungkin berhasil di beberapa browser/konfigurasi jika halaman sebelumnya ada interaksi
+                // Namun, tetap siapkan listener untuk interaksi manual
+                playAudio(); 
+
+                function handleFirstInteraction() {
+                    if (!hasInteracted) { // Hanya proses jika belum ada interaksi yang berhasil memutar audio
+                        playAudio();
+                    }
+                }
+
+                // Tambahkan listener untuk interaksi pertama
+                document.body.addEventListener('click', handleFirstInteraction);
+                document.body.addEventListener('touchstart', handleFirstInteraction); 
+
+                audioPlayer.onplaying = function() {
+                    if (audioWarning) audioWarning.style.display = 'none';
+                    hasInteracted = true; // Jika auto-play berhasil atau dari cache
+                    document.body.removeEventListener('click', handleFirstInteraction);
+                    document.body.removeEventListener('touchstart', handleFirstInteraction);
+                };
+
+                audioPlayer.onerror = function() {
+                    if (audioWarning) {
+                        audioWarning.textContent = "Gagal memuat musik. Pastikan 'music/hbd.mp3' ada.";
+                        audioWarning.style.display = 'block';
+                    }
+                    console.error("Error pada audio player di ucapan.html:", audioPlayer.error);
+                };
+                
+                const audioSourceElement = audioPlayer.querySelector('source');
+                if (!audioSourceElement || !audioSourceElement.getAttribute('src')) {
+                     if (audioWarning) {
+                        audioWarning.textContent = "Sumber musik tidak ditemukan.";
+                        audioWarning.style.display = 'block';
+                    }
+                }
+            }
+
+            const nextButton = document.getElementById('nextButton');
+            if (nextButton) {
+                nextButton.addEventListener('click', function() {
+                    if (audioPlayer) {
+                        const audioSourceToStore = audioPlayer.querySelector('source') ? audioPlayer.querySelector('source').getAttribute('src') : audioPlayer.currentSrc;
+                        localStorage.setItem('audioCurrentTime', audioPlayer.currentTime.toString());
+                        localStorage.setItem('audioSource', audioSourceToStore || ''); 
+                        localStorage.setItem('audioIsPlaying', (!audioPlayer.paused).toString());
+                        console.log("Ucapan: Audio state tersimpan - Waktu:", audioPlayer.currentTime, "Sumber:", audioSourceToStore, "Diputar:", !audioPlayer.paused);
+                    }
+                    window.location.href = "foto.html"; 
+                });
+            }
+        });
+    </script>
+</body>
+</html>
