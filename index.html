@@ -131,33 +131,33 @@
             from { opacity: 0; transform: translateY(30px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        
+
         #countdownTimer {
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start; 
-            flex-wrap: wrap; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
             font-family: 'Playfair Display', serif;
             color: #e96443;
             margin-top: 20px;
             margin-bottom: 15px;
-            width: 100%; 
+            width: 100%;
         }
 
         .timer-segment {
             background-color: rgba(243, 129, 129, 0.1);
-            padding: 15px 20px; 
+            padding: 15px 20px;
             border-radius: 15px;
             border: 1px solid rgba(243, 129, 129, 0.3);
-            margin: 0 8px; 
-            text-align: center; 
-            min-width: 80px; 
+            margin: 0 8px;
+            text-align: center;
+            min-width: 80px;
         }
 
         .timer-segment .time-value {
-            font-size: 2.5rem; 
-            line-height: 1.1; 
-            display: block; 
+            font-size: 2.5rem;
+            line-height: 1.1;
+            display: block;
         }
 
         .timer-segment .time-label {
@@ -166,15 +166,15 @@
             text-transform: uppercase;
             color: #f38181;
             display: block;
-            margin-top: 5px; 
+            margin-top: 5px;
             font-weight: 400;
         }
-        
+
         .timer-separator {
             font-size: 2rem;
             color: #e96443;
-            align-self: center; 
-            padding-bottom: 1.2rem; 
+            align-self: center;
+            padding-bottom: 1.2rem;
         }
 
 
@@ -186,11 +186,11 @@
             .flower { font-size: 16px; }
 
             #countdownTimer {
-                flex-direction: row; 
+                flex-direction: row;
             }
             .timer-segment {
                 padding: 10px 12px;
-                margin: 5px; 
+                margin: 5px;
                 min-width: 65px;
             }
             .timer-segment .time-value {
@@ -234,7 +234,7 @@
             border-radius: 30px;
             font-size: 1.1rem;
             font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Montserrat', sans-serif; /* Menggunakan Montserrat untuk tombol */
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 6px 20px rgba(255, 126, 179, 0.4);
@@ -245,11 +245,38 @@
         }
 
 
-        .page { display: none; } 
+        .page { display: none; }
         .page.active { display: block; }
+        /* Styles for ucapan.html - initially hidden in index.html context */
         .header-image, .greeting-title, .friend-name, .message, .photo-placeholder, .closing-wish, .navigation-buttons {
             display: none;
         }
+
+        /* Style for audio warning message */
+        #audioPlayPrompt {
+            display: none; /* Initially hidden */
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            z-index: 1000;
+            animation: fadeInWarning 0.5s ease-out;
+            cursor: pointer;
+        }
+
+        @keyframes fadeInWarning {
+            from { opacity: 0; bottom: 0px; }
+            to { opacity: 1; bottom: 20px; }
+        }
+         @media (max-width: 600px) {
+            #audioPlayPrompt { font-size: 0.85rem; padding: 10px 18px; width: 90%; max-width: 320px;}
+        }
+
 
     </style>
 </head>
@@ -261,13 +288,20 @@
         <div class="cloud cloud3"></div>
         </div>
 
+    <audio id="backgroundMusic" loop>
+        <source src="music/1.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio. Harap perbarui browser Anda atau gunakan browser lain.
+    </audio>
+
+    <div id="audioPlayPrompt">Ketuk di mana saja untuk memutar musik.</div>
+
     <div class="card">
         <div id="countdownSection" class="page active">
             <p class="countdown-label">Menanti Hari Istimewamu...</p>
             <div id="countdownTimer">
                 </div>
             <p class="step-message">Sebuah kejutan kecil sedang dalam perjalanan!</p>
-            <p id="redirectMessage" style="display:none;">Saatnya tiba! Mengalihkanmu sekarang...</p> 
+            <p id="redirectMessage" style="display:none;">Saatnya tiba! Mengalihkanmu sekarang...</p>
             <div class="nav-button-container" id="continueButtonContainer" style="display:none;">
                 <button id="continueButton" class="nav-button">Lanjutkan ke Ucapan &rarr;</button>
             </div>
@@ -275,38 +309,83 @@
     </div>
 
     <script>
-        // Target tanggal untuk hitung mundur (23 Mei 2025)
-        const targetDate = new Date("May 23, 2025 00:00:00").getTime();
-        let countdownInterval; 
+        // Target date for the countdown (May 23, 2025, 06:00:00)
+        // PENTING: Bulan pada objek Date di JavaScript dimulai dari 0 (Januari=0, Mei=4)
+        const targetDate = new Date(2025, 4, 23, 6, 0, 0).getTime(); // Bulan sudah dikoreksi menjadi 4 untuk Mei
+        let countdownInterval; // Variabel untuk menyimpan ID interval
 
+        // Mendapatkan elemen DOM
         const countdownTimerEl = document.getElementById('countdownTimer');
-        const redirectMessageEl = document.getElementById('redirectMessage'); // Tetap ada untuk disembunyikan
+        const redirectMessageEl = document.getElementById('redirectMessage');
         const stepMessageEl = document.querySelector('.step-message');
         const continueButtonContainerEl = document.getElementById('continueButtonContainer');
         const continueButtonEl = document.getElementById('continueButton');
         const backgroundAnimationsContainer = document.querySelector('.background-animations');
+        const backgroundMusicPlayer = document.getElementById('backgroundMusic'); // Audio player
+        const audioPlayPromptEl = document.getElementById('audioPlayPrompt'); // Prompt message
 
+        let hasInteractedWithAudio = false; // Flag for first audio interaction
+
+        // Fungsi untuk memutar audio
+        function tryPlayAudio() {
+            if (!backgroundMusicPlayer) return;
+
+            if (backgroundMusicPlayer.paused) {
+                const playPromise = backgroundMusicPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        // Audio started playing successfully
+                        console.log("Musik latar berhasil diputar.");
+                        if (audioPlayPromptEl) audioPlayPromptEl.style.display = 'none';
+                        hasInteractedWithAudio = true;
+                        // Remove interaction listeners once audio plays
+                        document.body.removeEventListener('click', handleFirstAudioInteraction);
+                        document.body.removeEventListener('touchstart', handleFirstAudioInteraction);
+                        if (audioPlayPromptEl) audioPlayPromptEl.removeEventListener('click', handleFirstAudioInteraction);
+                    }).catch(error => {
+                        console.warn("Gagal memulai musik latar:", error);
+                        // Show prompt if autoplay is disallowed and no interaction yet
+                        if (error.name === "NotAllowedError" && !hasInteractedWithAudio && audioPlayPromptEl) {
+                            audioPlayPromptEl.style.display = 'block';
+                        }
+                    });
+                }
+            } else {
+                // Audio is already playing
+                if (audioPlayPromptEl) audioPlayPromptEl.style.display = 'none';
+            }
+        }
+
+        // Handle first user interaction for audio
+        function handleFirstAudioInteraction() {
+            if (!hasInteractedWithAudio) {
+                tryPlayAudio();
+            }
+        }
+
+
+        // Fungsi untuk membuat animasi bunga jatuh
         function createFallingFlowers() {
-            const numberOfFlowers = 20; 
-            const flowerEmojis = ['🌸', '🌺', '🌼', '🌷', '🌻']; 
+            const numberOfFlowers = 25;
+            const flowerEmojis = ['🌸', '🌺', '🌷', '💖', '✨'];
 
             for (let i = 0; i < numberOfFlowers; i++) {
-                const flower = document.createElement('div'); 
-                flower.classList.add('flower'); 
-                flower.innerHTML = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)]; 
-                flower.style.left = Math.random() * 100 + 'vw'; 
-                flower.style.fontSize = (Math.random() * 10 + 15) + 'px'; 
-                
-                const translateXEnd = (Math.random() * 60 - 30) + 'px'; 
-                
+                const flower = document.createElement('div');
+                flower.classList.add('flower');
+                flower.innerHTML = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+                flower.style.left = Math.random() * 100 + 'vw';
+                flower.style.fontSize = (Math.random() * 12 + 18) + 'px';
+
+                const translateXEnd = (Math.random() * 80 - 40) + 'px';
+
                 flower.animate([
-                    { transform: `translateY(-10vh) translateX(0px) rotate(0deg)`, opacity: 1 },
-                    { transform: `translateY(110vh) translateX(${translateXEnd}) rotate(${Math.random() * 720 - 360}deg)`, opacity: 0 }
+                    { transform: `translateY(-15vh) translateX(0px) rotate(0deg)`, opacity: 1 },
+                    { transform: `translateY(115vh) translateX(${translateXEnd}) rotate(${Math.random() * 720 - 360}deg)`, opacity: 0 }
                 ], {
-                    duration: Math.random() * 5000 + 8000, 
-                    iterations: Infinity, 
-                    delay: Math.random() * 8000, 
-                    easing: 'linear' 
+                    duration: Math.random() * 6000 + 7000,
+                    iterations: Infinity,
+                    delay: Math.random() * 10000,
+                    easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)'
                 });
 
                 if (backgroundAnimationsContainer) {
@@ -315,6 +394,7 @@
             }
         }
 
+        // Fungsi untuk menampilkan ketika hitung mundur selesai
         function displayCountdownFinished() {
             if (countdownTimerEl) {
                 countdownTimerEl.innerHTML = `
@@ -340,13 +420,13 @@
                 `;
             }
             if (stepMessageEl) {
-                stepMessageEl.style.display = 'none'; // Sembunyikan pesan "Sebuah kejutan..."
+                stepMessageEl.style.display = 'none';
             }
             if (redirectMessageEl) {
-                redirectMessageEl.style.display = 'none'; // Pastikan pesan redirect juga tersembunyi
+                redirectMessageEl.style.display = 'none';
             }
             if (continueButtonContainerEl) {
-                continueButtonContainerEl.style.display = 'block'; // Tampilkan kontainer tombol
+                continueButtonContainerEl.style.display = 'block';
             }
             if (continueButtonEl) {
                  continueButtonEl.onclick = function() {
@@ -355,14 +435,15 @@
             }
         }
 
+        // Fungsi untuk memperbarui timer hitung mundur
         function updateCountdown() {
-            const now = new Date().getTime(); 
-            const distance = targetDate - now; 
+            const now = new Date().getTime();
+            const distance = targetDate - now;
 
             if (distance <= 0) {
-                clearInterval(countdownInterval); 
-                displayCountdownFinished(); // Panggil fungsi untuk menampilkan state selesai
-                return; 
+                clearInterval(countdownInterval);
+                displayCountdownFinished();
+                return;
             }
 
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -395,17 +476,57 @@
             }
         }
 
+        // Event listener untuk ketika DOM sudah sepenuhnya dimuat
         document.addEventListener('DOMContentLoaded', function() {
-            createFallingFlowers(); 
+            createFallingFlowers();
 
-            const now = new Date().getTime(); 
+            // Countdown logic
+            const now = new Date().getTime();
             if (now >= targetDate) {
-                displayCountdownFinished(); // Panggil fungsi untuk menampilkan state selesai jika sudah lewat
+                displayCountdownFinished();
             } else {
-                if (stepMessageEl) stepMessageEl.style.display = 'block'; // Tampilkan pesan "kejutan" jika countdown aktif
-                if (continueButtonContainerEl) continueButtonContainerEl.style.display = 'none'; // Sembunyikan tombol jika countdown aktif
-                updateCountdown(); 
-                countdownInterval = setInterval(updateCountdown, 1000); 
+                if (stepMessageEl) stepMessageEl.style.display = 'block';
+                if (continueButtonContainerEl) continueButtonContainerEl.style.display = 'none';
+                updateCountdown();
+                countdownInterval = setInterval(updateCountdown, 1000);
+            }
+
+            // Audio logic
+            if (backgroundMusicPlayer) {
+                // Attempt to play audio automatically
+                tryPlayAudio();
+
+                // Add event listeners for first interaction if autoplay fails
+                document.body.addEventListener('click', handleFirstAudioInteraction);
+                document.body.addEventListener('touchstart', handleFirstAudioInteraction);
+                if (audioPlayPromptEl) audioPlayPromptEl.addEventListener('click', handleFirstAudioInteraction);
+
+
+                // If audio starts playing (e.g. autoplay worked or due to cached permissions)
+                backgroundMusicPlayer.onplaying = function() {
+                    console.log("Musik latar sedang diputar (event onplaying).");
+                    if (audioPlayPromptEl) audioPlayPromptEl.style.display = 'none';
+                    hasInteractedWithAudio = true;
+                    document.body.removeEventListener('click', handleFirstAudioInteraction);
+                    document.body.removeEventListener('touchstart', handleFirstAudioInteraction);
+                     if (audioPlayPromptEl) audioPlayPromptEl.removeEventListener('click', handleFirstAudioInteraction);
+                };
+
+                // Handle audio errors, e.g. file not found
+                backgroundMusicPlayer.onerror = function() {
+                    console.error("Error pada pemutar musik latar:", backgroundMusicPlayer.error);
+                    if (audioPlayPromptEl) {
+                        audioPlayPromptEl.textContent = "Gagal memuat musik. Periksa file & path.";
+                        audioPlayPromptEl.style.display = 'block';
+                    }
+                };
+                const audioSourceElement = backgroundMusicPlayer.querySelector('source');
+                if (!audioSourceElement || !audioSourceElement.getAttribute('src') || audioSourceElement.getAttribute('src') === 'YOUR_MUSIC_FILE.mp3') {
+                     if (audioPlayPromptEl && (!backgroundMusicPlayer.error)) { // Don't overwrite specific error messages
+                        audioPlayPromptEl.textContent = "Sumber musik belum diatur. Ganti 'YOUR_MUSIC_FILE.mp3'.";
+                        audioPlayPromptEl.style.display = 'block';
+                    }
+                }
             }
         });
     </script>
